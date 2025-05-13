@@ -1,83 +1,99 @@
 <?php
-include 'config.php';
+session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = $_POST["username"] ?? "";
+    $password = $_POST["password"] ?? "";
 
-    // Fake firewall detection
-    if (preg_match("/('|--|;|=|OR|AND|UNION|SELECT|FROM|WHERE)/i", $username . $password)) {
-        $log = "[" . date("Y-m-d H:i:s") . "] Suspicious input from IP: " . $_SERVER['REMOTE_ADDR'] . " | Payload: $username / $password" . PHP_EOL;
-        file_put_contents("log.txt", $log, FILE_APPEND);
-        echo "<p style='color:red;'>[ALERT] Suspicious activity detected!</p>";
-        
-        // If attacker uses specific payload, serve the database file
-        if (strpos($username, 'UNION SELECT') !== false || strpos($username, '1=1') !== false) {
-            header('Content-Type: application/octet-stream');
-            header('Content-Disposition: attachment; filename="stolen_database.txt"');
-            readfile($db_file);
-            exit();
-        }
-    }
+    // Hash the entered password
+    $hashed_password = md5($password);
 
-    // Simulate vulnerable authentication
-    $lines = file($db_file, FILE_IGNORE_NEW_LINES);
-    $authenticated = false;
-    
-    // Skip header line
-    for ($i = 1; $i < count($lines); $i++) {
-        $fields = explode(',', $lines[$i]);
-        if (count($fields) >= 3) {
-            $db_username = $fields[1];
-            $db_password = $fields[2];
+    // Open database file
+    $file = fopen("database.txt", "r");
+    $found = false;
+
+    if ($file) {
+        while (($line = fgets($file)) !== false) {
+            $line = trim($line);
+            if (empty($line)) continue;
             
-            // Vulnerable comparison - simulating SQL injection
-            if ($db_username == $username && $db_password == md5($password)) {
-                $authenticated = true;
-                break;
-            }
-            
-            // Simulate SQL injection vulnerability
-            if (strpos($username, "' OR '1'='1") !== false) {
-                $authenticated = true;
+            list($file_username, $file_password) = explode(",", $line);
+
+            if ($file_username === $username && $file_password === $hashed_password) {
+                $found = true;
                 break;
             }
         }
+        fclose($file);
     }
 
-    if ($authenticated) {
-        header("Location: success.php");
+    if ($found) {
+        // Successful login
+        $_SESSION["username"] = $username;  // Store username in session
+        header("Location: dashboard.php");   // Redirect to the protected page/dashboard
         exit();
     } else {
-        echo "<p style='color:red;'>Invalid username or password.</p>";
+        $error = "Invalid credentials!";
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Vulnerable Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Secure Web App</title>
+    <!-- Include Bootstrap CSS (via CDN) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f7fc;
+            height: 100vh;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: auto;
+            padding-top: 50px;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h2>File-Based Vulnerable Login</h2>
-    <p>This system uses a text file as a "database" and is vulnerable to simulated SQL injection.</p>
-    
-    <form method="POST">
-        <label>Username:</label><br>
-        <input type="text" name="username" required><br>
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
-        <input type="submit" value="Login">
-    </form>
-    
-    <div style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;">
-        <h3>Try these simulated SQLi payloads:</h3>
-        <ul>
-            <li><code>admin' --</code> (leave password empty)</li>
-            <li><code>' OR '1'='1</code> (with any password)</li>
-            <li><code>' UNION SELECT 1,2,3 --</code> (will download database.txt)</li>
-        </ul>
+    <div class="login-container">
+        <div class="card">
+            <div class="card-header">Secure Login</div>
+            <div class="card-body">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger"><?= $error ?></div>
+                <?php endif; ?>
+                <form method="POST" action="">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+            </div>
+        </div>
     </div>
+    <!-- Include Bootstrap JS (via CDN) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

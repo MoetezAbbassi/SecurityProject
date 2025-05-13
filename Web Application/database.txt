@@ -1,4 +1,2 @@
-id,username,password
-1,admin,5f4dcc3b5aa765d61d8327deb882cf99  # password: 'password'
-2,john,d8578edf8458ce06fbc5bb76a58c5ca4  # password: 'qwerty'
-3,test,098f6bcd4621d373cade4e832627b4f6  # password: 'test'
+admin,21232f297a57a5a743894a0e4a801fc3
+user,098f6bcd4621d373cade4e832627b4f6
