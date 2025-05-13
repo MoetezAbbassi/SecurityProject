@@ -1,14 +1,4 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "webappdb";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// Simulate database configuration
+$db_file = 'database.txt';
 ?>
