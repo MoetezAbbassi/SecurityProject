@@ -1,51 +1,52 @@
 <?php
-session_start();
+// CONFIG - UPDATE THESE VALUES FROM INFINITYFREE
+$servername = "sql311.infinityfree.com"; // Replace with your actual MySQL host
+$username_db = "if0_38974084 ";    // Your InfinityFree username
+$password_db = "toS31ptbxTo ";   // Your MySQL password
+$dbname = "if0_38974084_test"; // Your database name
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST["username"] ?? "";
-    $password = $_POST["password"] ?? "";
+// CONNECT TO DB
+$conn = new mysqli($servername, $username_db, $password_db, $dbname);
 
-    // Connect to SQLite database
-    $db = new SQLite3('database.db');
+// CHECK CONNECTION
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-    // ⚠️ VULNERABLE SQL QUERY (no sanitization or prepared statements)
-    $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $result = $db->query($query);
+// PART 1: INSECURE LOGIN
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user = $_POST['username'];
+    $pass = md5($_POST['password']); // weak MD5 hash
 
-    if ($result && $result->fetchArray()) {
-        $_SESSION["username"] = $username;
-        header("Location: dashboard.php");
-        exit();
+    // SQL injection-vulnerable query
+    $query = "SELECT * FROM users WHERE username='$user' AND password='$pass'";
+    $result = $conn->query($query);
+
+    if ($result && $result->num_rows > 0) {
+        echo "✅ Login SUCCESS (but this system is vulnerable)";
     } else {
-        $error = "Invalid credentials!";
+        echo "❌ Login FAILED";
+    }
+
+    
+    // PART 2: FAKE FIREWALL LOGGING
+    $payload = $_POST['username'] . $_POST['password'];
+    if (preg_match("/(\b(SELECT|UNION|INSERT|UPDATE|DELETE|DROP|--|#|OR|AND)\b|['\";=])/i", $payload)) {
+        $log = "[" . date("Y-m-d H:i:s") . "] IP: " . $_SERVER['REMOTE_ADDR'] .
+               " - Payload: $payload" .
+               " - Agent: " . $_SERVER['HTTP_USER_AGENT'] . "\n";
+        file_put_contents("log.txt", $log, FILE_APPEND);
+        echo "<br><span style='color:red'>⚠️ ALERT: Suspicious input logged.</span>";
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login - Insecure Web App</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h2>Login to Continue</h2>
-
-    <?php if (isset($error)): ?>
-        <p style="color: red;"><?= $error ?></p>
-    <?php endif; ?>
-
-    <form method="POST" action="">
-        <div>
-            <input type="text" name="username" placeholder="Username" required>
-        </div>
-        <div>
-            <input type="password" name="password" placeholder="Password" required>
-        </div>
-        <div>
-            <button type="submit">Login</button>
-        </div>
-    </form>
-</body>
-</html>
+<!-- HTML LOGIN FORM -->
+<h2>🔐 Demo Login</h2>
+<form method="POST">
+    <label>Username:</label><br>
+    <input type="text" name="username" required><br><br>
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br><br>
+    <input type="submit" value="Login">
+</form>
