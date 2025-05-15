@@ -1,6 +1,5 @@
 <?php
 
-// 🚨 Load & Analyze Input
 function run_firewall($username, $password) {
     $input = $username . $password;
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
@@ -11,29 +10,27 @@ function run_firewall($username, $password) {
     $is_suspicious = detect_sqli($input);
 
     if ($is_suspicious) {
-        $message = "[$timestamp] IP: $ip | Payload: $input | Agent: $agent | Severity: $severity\n";
-        file_put_contents("log.txt", $message, FILE_APPEND);
+        // 🔥 TEXT LOG
+        $txtLog = "[$timestamp] IP: $ip | Payload: $input | Agent: $agent | Severity: $severity\n";
+        file_put_contents("log.txt", $txtLog, FILE_APPEND);
 
-        // 🗂️ Also log to CSV for later analytics
-        $csv = fopen("log.csv", "a");
-        fputcsv($csv, [$timestamp, $ip, $input, $agent, $severity]);
-        fclose($csv);
+        // 🔥 CSV LOG
+        $csvFile = fopen("log.csv", "a");
+        fputcsv($csvFile, [$timestamp, $ip, $input, $agent, $severity]);
+        fclose($csvFile);
 
-        echo "<p style='color:red'>⚠️ ALERT: Suspicious input detected and logged. Severity: $severity</p>";
-
-        // 📬 Email alert system (optional, disabled)
-        // send_alert_email($ip, $input, $agent, $severity);
+        echo "<p style='color:red'>⚠️ ALERT: Suspicious input logged. Severity: $severity</p>";
     }
 
     update_ip_counter($ip);
 }
 
-// 🔍 SQL Injection Detection
+// 🔍 Detect SQLi patterns
 function detect_sqli($input) {
     return preg_match("/(\b(SELECT|UNION|INSERT|UPDATE|DELETE|DROP|--|#|OR|AND)\b|['\";=])/i", $input);
 }
 
-// 🧮 Severity Estimation (score 1–10)
+// 🧮 Estimate attack severity (1–10)
 function calculate_severity($input) {
     $score = 0;
     $patterns = [
@@ -59,10 +56,10 @@ function calculate_severity($input) {
     return min($score, 10);
 }
 
-// 📊 IP Frequency Tracker (for manual review)
+// 📊 Track IP login attempts
 function update_ip_counter($ip) {
-    $ip_file = "ip_hits.txt";
-    $lines = file_exists($ip_file) ? file($ip_file, FILE_IGNORE_NEW_LINES) : [];
+    $file = "ip_hits.txt";
+    $lines = file_exists($file) ? file($file, FILE_IGNORE_NEW_LINES) : [];
     $ip_counts = [];
 
     foreach ($lines as $line) {
@@ -77,22 +74,9 @@ function update_ip_counter($ip) {
         $out .= "$logged_ip|$count\n";
     }
 
-    file_put_contents($ip_file, $out);
+    file_put_contents($file, $out);
 
     if ($ip_counts[$ip] >= 5) {
-        echo "<p style='color:orange'>⚠️ Warning: IP $ip has attempted $ip_counts[$ip] logins. Consider blocking.</p>";
+        echo "<p style='color:orange'>⚠️ IP $ip has attempted $ip_counts[$ip] times. Consider monitoring.</p>";
     }
 }
-
-// 📬 Optional Email Alert (disabled by default)
-function send_alert_email($ip, $input, $agent, $severity) {
-    $to = "admin@example.com";
-    $subject = "🚨 SQLi Alert Detected";
-    $body = "Suspicious input detected!\nIP: $ip\nPayload: $input\nUser Agent: $agent\nSeverity: $severity";
-    $headers = "From: firewall@yourdomain.com";
-
-    // ⚠️ Only enable if mail() works in your environment
-    // mail($to, $subject, $body, $headers);
-}
-
-?>

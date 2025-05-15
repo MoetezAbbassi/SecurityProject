@@ -7,16 +7,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // 🛡️ INCLUDE FAKE FIREWALL (modular logger)
     require_once "firewall.php";
-    run_firewall($username, $password); // handles detection/logging but allows execution
+    run_firewall($username, $password); // detection/logging
 
-    // 💾 CONNECT TO SQLite DB
-    $db = new SQLite3('database.db');
+    // 📖 READ users.txt LINE-BY-LINE
+    $found = false;
+    $file = fopen("users.txt", "r");
 
-    // ⚠️ VULNERABLE SQL QUERY (no sanitization, no hashing)
-    $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $result = $db->query($query);
+    if ($file) {
+        while (($line = fgets($file)) !== false) {
+            $line = trim($line);
+            if (empty($line)) continue;
 
-    if ($result && $result->fetchArray()) {
+            [$stored_user, $stored_pass] = explode(",", $line);
+            
+            if ($username === $stored_user && $password === $stored_pass) {
+                $found = true;
+                break;
+            }
+        }
+        fclose($file);
+    } else {
+        $error = "⚠️ Could not open users.txt";
+    }
+
+    if ($found) {
         $_SESSION["username"] = $username;
         header("Location: dashboard.php");
         exit();
