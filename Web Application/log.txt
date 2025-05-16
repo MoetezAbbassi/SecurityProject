@@ -5,3 +5,7 @@
 [2025-05-15 08:51:17] IP: ::1 | Payload: admin' --dsqdsq | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 2
 [2025-05-15 08:52:02] IP: ::1 | Payload: admin' --dsqdsq | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 2
 [2025-05-15 08:57:34] IP: ::1 | Payload: admin' --dsfqdsq | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 2
+[2025-05-16 13:13:53] IP: ::1 | Payload: admin' OR '1'='1dsqdsq | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 4
+[2025-05-16 13:22:58] IP: ::1 | Payload: admin' OR '1'='1dsqdsq | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 4
+[2025-05-16 13:23:35] IP: ::1 | Payload: admin' --zdasdas | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 2
+[2025-05-16 13:23:45] IP: ::1 | Payload: admin' OR '1'='1fdqsdsqd | Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 OPR/118.0.0.0 | Severity: 4

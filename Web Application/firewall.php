@@ -14,9 +14,9 @@ function run_firewall($username, $password) {
         $txtLog = "[$timestamp] IP: $ip | Payload: $input | Agent: $agent | Severity: $severity\n";
         file_put_contents("log.txt", $txtLog, FILE_APPEND);
 
-        // 🔥 CSV LOG
+        // 🔥 CSV LOG — fixed fputcsv deprecation issue
         $csvFile = fopen("log.csv", "a");
-        fputcsv($csvFile, [$timestamp, $ip, $input, $agent, $severity]);
+        fputcsv($csvFile, [$timestamp, $ip, $input, $agent, $severity], ",", '"', "\\");
         fclose($csvFile);
 
         echo "<p style='color:red'>⚠️ ALERT: Suspicious input logged. Severity: $severity</p>";
